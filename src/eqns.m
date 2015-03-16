@@ -9,6 +9,7 @@ m_r   = vars(5);
 V     = vars(6);
 m_air = vars(7);
 
+% if the rocket hits the ground stop everything
 if z <= 0
     for i=1:7
         vars_dt(i) = 0.0;
