@@ -10,7 +10,7 @@
 % T_0-initial temperature
 
 global pressure_ambient density_h20 volume_bottle discharge_coeff P_0 gravity drag_coeff gas_constant V_0 m_air_i p_end A_b area_throat T_0
-global force_x;
+global force_x MassW0;
 force_x = [];
 gravity = 9.81;
 gas_constant = 287.0;
