@@ -1,7 +1,7 @@
 function [vars_dt] = eqns(t_span,vars)
 
 global pressure_ambient density_h20 volume_bottle discharge_coeff P_0 gravity drag_coeff gas_constant V_0 m_air_i p_end A_b area_throat T_0 
-global isp force_x
+global isp force_x rho_air
 v     = vars(1);
 theta = vars(2);
 z     = vars(4);
