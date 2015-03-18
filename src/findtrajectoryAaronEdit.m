@@ -55,9 +55,9 @@ EndTime = 50; % seconds
 
 
 % Set up the initial conditions
-vars_init(1) = 0; % initial velocity of rocket (x)
-vars_init(2) = 0; % initial velocity of rocket (y)
-vars_init(3) = 0; % initial velocity of rocket (z)
+vars_init(1) = 0.001; % initial velocity of rocket (x)
+vars_init(2) = 0.001; % initial velocity of rocket (y)
+vars_init(3) = 0.001; % initial velocity of rocket (z)
 vars_init(4) = AngI; % Launch Angle (theta)
 vars_init(5) = 0; % initial angle from launch direction (phi)
 vars_init(6) = 0; % inital displacement in x direction
@@ -77,7 +77,7 @@ measure_time = 5; % [sec]
 frequency = 100; % [Hz]
 time = linspace(0,measure_time,measure_time*frequency);
 % call ode45
-[t,vars_dt] = ode45('eqnsEDIT',time,vars_init); 
+[t,vars_dt] = ode45('eqnsAaronEdit',time,vars_init); 
 stopindex = 641;
 stoptime = stopindex*time(2);
 % temp = 9.0039 .* gravity .* log(1.1542./MassB);
@@ -102,7 +102,7 @@ title('Rocket Velocity as a Function of Time');
 % title('Rocket Distance as a Function of Time');
 % 
 % figure;
-% plot(t,vars_dt(:,(4)));
+% plot(t,vars_dt(:,(8)));
 % xlabel('Time(s)');
 % ylabel('Height(m)');
 % title('Rocket Height as a Function of Time');
@@ -126,7 +126,7 @@ title('Rocket Velocity as a Function of Time');
 % xlabel('Distance(m)');
 % ylabel('Height(m)');
 
-%%
+% %%
 clear vars_dt
 clear t
 m_launch = 1270; % grams
@@ -139,7 +139,7 @@ vars_init(3) = V_0_z;
 vars_init(9) = m_end/1000;
 vars_init(10) = volume_bottle;
 
-[t,vars_dt] = ode45('eqnsEDIT',time,vars_init);
+[t,vars_dt] = ode45('eqnsAaronEdit',time,vars_init);
 % 
 % figure
 % plot(t,vars_dt(:,8))

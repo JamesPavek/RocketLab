@@ -1,9 +1,9 @@
-function [vars_dt] = eqnsEDIT(time,vars)
+function [vars_dt] = eqnsAaronEdit(time,vars)
 
 global pressure_ambient density_h20 volume_bottle discharge_coeff P_0 gravity drag_coeff gas_constant V_0 m_air_i p_end A_b area_throat T_0 
 global isp force_x
 
-v_mag_rel = sqrt(vars(1)^2 + vars(2)^2 + vars(3)^2);
+
 theta = vars(4);
 z     = vars(8);
 m_r   = vars(9);
@@ -13,14 +13,17 @@ wind_x = vars(12); % m/s
 wind_y = vars(13); % m/s
 wind_z = vars(14); % m/s
 
-v_x_rel = vars(1) - wind_x;
-v_y_rel = vars(2) - wind_y;
-v_z_rel = vars(3) - wind_z;
-if v_mag_rel > 0
+v_x_rel = vars(1) + wind_x;
+v_y_rel = vars(2) + wind_y;
+v_z_rel = vars(3) + wind_z;
+v_mag_rel = sqrt(v_x_rel^2 + v_y_rel^2 + v_z_rel^2);
+
+if v_mag_rel > 5
     heading = [v_x_rel/v_mag_rel, v_y_rel/v_mag_rel, v_z_rel/v_mag_rel];
 else
     heading = [cos(theta)/(sin(theta)+cos(theta)), 0, sin(theta)/(cos(theta) + sin(theta))];
 end
+
 phi = atan(v_y_rel/v_x_rel); % [rad]
 
 % if the rocket hits the ground stop everything
@@ -47,7 +50,7 @@ if Volume_air < volume_bottle
     Fx = F*heading(1);
     Fy = F*heading(2);
     Fz = F*heading(3);
-%     fprintf('Phase 1 \n')
+    fprintf('Phase 1 \n')
     % set up the 3 forcing functions
     dmrdt = -m_dot_h20;
     dVdt = discharge_coeff*area_throat*v_e;
@@ -68,7 +71,7 @@ if Volume_air >= volume_bottle
     rho = m_air/volume_bottle;
     T_air = p_air/(gas_constant*rho);
     p_crit = p_air*(2/(1.4+1))^(1.4/(1.4-1));
-%     fprintf('Phase 2 \n')
+    fprintf('Phase 2 \n')
     if p_crit > pressure_ambient
         % Flow is choked
         p_e = p_crit;
@@ -140,6 +143,6 @@ dzdt = v_z_rel;
 
 % set all forcing functions
 
-vars_dt = [dvxdt dvydt dvzdt dtheta_dt dphi_dt dxdt dydt dzdt dmrdt dVdt dmadt 0 0 0];
+vars_dt = [dvxdt, dvydt, dvzdt, dtheta_dt, dphi_dt, dxdt, dydt, dzdt, dmrdt, dVdt, dmadt, 0, 0, 0];
 vars_dt = vars_dt';
 end
