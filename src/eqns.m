@@ -1,4 +1,4 @@
-function [vars_dt] = eqns(vars, method)
+function [vars_dt] = eqns(t,vars, method)
 %{
 | Input       | Unit | Description                             |
 |-------------+------+-----------------------------------------|
@@ -8,7 +8,7 @@ function [vars_dt] = eqns(vars, method)
 | mass_rocket | kg   | Rocket mass                             |
 | mass_air    | kg   | Air mass                                |
 %}
-    global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind pressure_absolute launch_angle launch_rail_length
+    global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
 
     position = [vars(1) vars(2) vars(3)];
     velocity = [vars(4) vars(5) vars(6)];
@@ -27,67 +27,7 @@ function [vars_dt] = eqns(vars, method)
         % Provides model of force_thrust force over time
         % Assumes ideal nozzle
         % Phase 1 - before all the water is expelled
-        if volume_air < volume_bottle
-            p = pressure_absolute*(volume_initial/volume_air)^1.4;
-            T = temperature_initial*(volume_initial/volume_air)^(1.4-1);
-            v_e = sqrt(2*(p-pressure_ambient)/density_water);
-            m_dot_h20 = discharge_coeff*density_water*throat_area*v_e;
-            force_thrust = m_dot_h20*v_e;
-            
-            % set up the 3 forcing functions
-            dmrdt = -m_dot_h20;
-            dVdt = discharge_coeff*throat_area*v_e;
-            dmadt = 0;
-            temp = ((1/gravity)*sqrt(2*abs(p-pressure_ambient)/ density_water));
-        end
-
-        % Phase 2 - after water is expelled and compressed air is expanding
-        if volume_air >= volume_bottle
-            p_air = p_end*(mass_air/mass_air_i)^1.4;
-            rho = mass_air/volume_bottle;
-            T_air = p_air/(gas_constant*rho);
-            p_crit = p_air*(2/(1.4+1))^(1.4/(1.4-1));
-            
-            if p_crit > pressure_ambient
-                % Flow is choked
-                p_e = p_crit;
-                
-                M_e = 1.0;
-                T_e = (2/(1.4+1))*T_air;
-            else
-                %Flow is not choked
-                p_e = pressure_ambient;
-                M_e = sqrt((2/(1.4-1))*((p_air/pressure_ambient)^((1.4-1)/1.4)-1));
-                T_e = T_air*(1+(((1.4-1)/2)*(M_e)^2));
-            end
-            
-            v_e = M_e*sqrt(1.4*gas_constant*T_e);
-            rho_e = p_e/(gas_constant*T_e);
-            m_dot_air = discharge_coeff*rho_e*throat_area*v_e;
-            force_thrust = m_dot_air*v_e+(p_e-pressure_ambient)*throat_area;
-            temp = force_thrust/m_dot_air;
-
-            if (force_thrust > 0)
-                force_x = [force_x; force_thrust];
-            end
-            p = p_air;
-            
-            % set up the 3 forcing functions
-            dmrdt = -m_dot_air;
-            dVdt = 0;
-            dmadt = -m_dot_air;
-        end
-
-        % Phase 3 - Ballistic motion
-        if p <= (pressure_ambient)
-            dmrdt = 0;
-            dVdt = 0;
-            dmadt = 0;
-            force_thrust = 0;
-            M_e = 0;
-            v_e = 0;
-            m_dot_air = 0;
-        end
+        [force_thrust,dVdt,dmrdt,dmadt] = model_thermodynamic(vars);
       case 'tsiolkovsky'                                  % Second method.
                                                           % Assumes instantaneous initial acceleration/ velocity
                                                           % Higher initial force_drag due to larger velocity, less inertia during initial stages of flight
@@ -110,6 +50,14 @@ function [vars_dt] = eqns(vars, method)
                                                             % Requires static tests for any condition changes
                                                             % Assumes static performance is the same as in flight}
                                                             % No pressure, no water. Air is at ambient pressure.
+        filename = '8am_3_16_test1';
+        [model_thrust, m_flow] = model_interpolation(filename,1.652000,t);
+        
+        dmrdt = -m_flow;
+        dVdt = 0;
+        dmadt = 0;
+        force_thrust = model_thrust;
+        
       otherwise
         error('None of the three cases!');
     end
