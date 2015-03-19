@@ -10,6 +10,7 @@ function [vars_dt] = eqns(vars, method)
 %}
     global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind pressure_absolute launch_angle launch_rail_length
 
+<<<<<<< HEAD
     position = [vars(1) vars(2) vars(3)];
     velocity = [vars(4) vars(5) vars(6)];
     volume_air = vars(7);
@@ -112,6 +113,27 @@ function [vars_dt] = eqns(vars, method)
                                                             % No pressure, no water. Air is at ambient pressure.
       otherwise
         error('None of the three cases!');
+=======
+<<<<<<< HEAD
+global pressure_ambient density_h20 volume_bottle discharge_coeff P_0 gravity drag_coeff gas_constant V_0 m_air_i p_end A_b area_throat T_0 
+global isp force_x rho_air
+v     = vars(1);
+=======
+global pressure_ambient density_water volume_bottle discharge_coeff P_0 gravity drag_coeff gas_constant V_0 m_air_i p_end A_b area_throat T_0 rho_air
+direction = [vars(1) vars(2) vars(3)];
+v = [vars(4) vars(5) vars(6)];
+>>>>>>> origin/dev
+theta = vars(2);
+phi = vars(3);
+v = vars[vars(6),vars(7),vars(8)];
+m_r   = vars(5);
+
+% if the rocket hits the ground stop everything
+if z <= 0
+    for i=1:length(i)
+        vars_dt(i) = 0.0;
+        v=0;
+>>>>>>> 17d6770b3cdf34f9c5254a6211bbfcb2899714f7
     end
 
 
