@@ -1,11 +1,37 @@
 function [force_thrust,dVdt,dmrdt,dmadt] = model_thermodynamic(vars)
+%% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
+%% ASEN2004 - Lab 2 - Simulated Bottle Rocket
+%% Thermodynamic Model Function
+
+%% Purpose: To use a thermodynamic model to calculate the thrust
+
+%{
+| Input       | Unit | Description                             |
+|-------------+------+-----------------------------------------|
+| position    | m    | A vector of the current rocket position |
+| velocity    | m    | Current rocket velocity                 |
+| volume_air  | m^3  | Air volume                              |
+| mass_rocket | kg   | Rocket mass                             |
+| mass_air    | kg   | Air mass                                |
+
+
+| Outputs      | Units | Description                              |
+|--------------+-------+------------------------------------------|
+| force_thrust | N     | Thrust at time in sample data            |
+| dVdt         | kg/s  | Calculated mass flow rate in sample data |
+| dmrdt        | kg/s  | Rate of change of rocket mass            |
+| dmadt        | kg/s  | Rate of change of air mass               |
+%}
+    
+%% Thermodynamic model
 % Ignores static test stand data, water and air viscosity (friction)
 % Ignores change in bottle shape and volume due to internal pressure
 % Allows investigation of changes to basic parameters (water volume, pressure, etc.) without physical testing
 % Provides model of force_thrust force over time
 % Assumes ideal nozzle
-% Phase 1 - before all the water is expelled
+    
     global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind pressure_absolute launch_angle launch_rail_length
+    % Phase 1 - before all the water is expelled
     position = [vars(1) vars(2) vars(3)];
     velocity = [vars(4) vars(5) vars(6)];
     volume_air = vars(7);

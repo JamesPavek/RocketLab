@@ -1,8 +1,23 @@
 function [thrust, m_flow] = model_interpolation(filename, sample_freq, time)
+    
+%% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
+%% ASEN2004 - Lab 2 - Simulated Bottle Rocket
+%% Interpolation Model Function
 
-% inputs: name of data file, data sample freq. [kHz], desired time [s]
-% outputs: propellant mass flow rate [kg/s], propellant exit velocity [m/s]
-%          thrust [N], specific impulse of data set [s]
+%% Purpose: To use static test data to model thrust and mass flow rate over time
+
+%{
+| Inputs      | Units | Description           |
+|-------------+-------+-----------------------|
+| filename    | N/A   | Static test data file |
+| sample_freq | kHz   | Data sample frequency |
+| time        | s     | Time                  |
+
+| Outputs | Units | Description                              |
+|---------+-------+------------------------------------------|
+| thrust  | N     | Thrust at time in sample data            |
+| m_flow  | kg/s  | Calculated mass flow rate in sample data |
+%}
     
     global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
 

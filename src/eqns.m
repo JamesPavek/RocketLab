@@ -1,5 +1,11 @@
 function [vars_dt] = eqns(t,vars, method)
 %{
+%% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
+%% ASEN2004 - Lab 2 - Simulated Bottle Rocket
+%% Main Function
+
+%% Purpose: To calculate the instantaneous rate of change of each variable listed in inputs and outputs.
+
 | Input       | Unit | Description                             |
 |-------------+------+-----------------------------------------|
 | position    | m    | A vector of the current rocket position |
@@ -7,6 +13,16 @@ function [vars_dt] = eqns(t,vars, method)
 | volume_air  | m^3  | Air volume                              |
 | mass_rocket | kg   | Rocket mass                             |
 | mass_air    | kg   | Air mass                                |
+
+| Output | Unit  | Description                   |
+|--------+-------+-------------------------------|
+| dposdt | m/s   | Rate of change of position    |
+| dvdt   | m/s^2 | Rate of change of velocity    |
+| dVdt   | m^3/s | Rate of change of volume      |
+| dmrdt  | kg/s  | Rate of change of rocket mass |
+| dmadt  | kg/s  | Rate of change of air mass    |
+
+
 %}
     global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
 
@@ -50,7 +66,7 @@ function [vars_dt] = eqns(t,vars, method)
                                                             % Requires static tests for any condition changes
                                                             % Assumes static performance is the same as in flight}
                                                             % No pressure, no water. Air is at ambient pressure.
-        filename = '8am_3_16_test1';
+        filename = '../data/TA_baseline_static_test';
         [model_thrust, m_flow] = model_interpolation(filename,1.652000,t);
         
         dmrdt = -m_flow;
