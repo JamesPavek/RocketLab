@@ -63,12 +63,31 @@ vars_init(9) = mass_air_initial;
 t_span = [0 10];
 ode_options = odeset('AbsTol',1e-14,'RelTol',1e-14);
 
-%method = 'thermodynamic';
-%[t,vars] = ode45(@(t,vars) eqns(vars',method),[0 10], vars_init,ode_options);
+method = 'thermodynamic';
+[t,vars] = ode45(@(t,vars) eqns(vars',method),[0 10], vars_init,ode_options);
+
+figure; 
+hold on;
+set(gca,'DefaultTextInterpreter', 'latex');
+set(gca,'fontsize',18);
+set(gca,'XMinorTick','on');
+set(gca,'YMinorTick','on');
+
+plot3(vars(:,1),vars(:,2),vars(:,3));
+
+legend('Rocket Trajectory');
+title('Rocket Trajectory, Thermodynamic Model'); 
+xlabel('x (m)');
+ylabel('y (m)');
+zlabel('z (m)');
+
+
+
 
 %% Tsiolkovsky Case
 
-[vx,vy,vz] = model_tsiolkovsky(1.12,gravity,launch_angle,mass_rocket_initial,bottle_mass);
+% Find initial velocity based on the calculated ISP and ideal rocket equation.
+[vx,vy,vz] = model_tsiolkovsky(1.12,gravity,launch_angle,mass_rocket_initial,bottle_mass)
 
 pos_initial = [0 0 0.1];                                                                    % [m] Initial position
 launch_angle = pi/4;                                                                             % [rad] Launch angle
@@ -94,7 +113,18 @@ vars_init(9) = mass_air_initial;
 
 method = 'tsiolkovsky';
 [t,vars] = ode45(@(t,vars) eqns(vars',method),[0 10], vars_init,ode_options);
-xpos = vars(:,1);
-ypos = vars(:,2);
-zpos = vars(:,3);
-plot3(xpos,ypos,zpos);
+
+figure; 
+hold on;
+set(gca,'DefaultTextInterpreter', 'latex');
+set(gca,'fontsize',18);
+set(gca,'XMinorTick','on');
+set(gca,'YMinorTick','on');
+
+plot3(vars(:,1),vars(:,2),vars(:,3));
+
+legend('Rocket Trajectory');
+title('Rocket Trajectory, Tsiolkovsky Model'); 
+xlabel('x (m)');
+ylabel('y (m)');
+zlabel('z (m)');
