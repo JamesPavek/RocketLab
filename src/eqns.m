@@ -66,7 +66,7 @@ function [vars_dt] = eqns(t,vars, method)
                                                             % Requires static tests for any condition changes
                                                             % Assumes static performance is the same as in flight}
                                                             % No pressure, no water. Air is at ambient pressure.
-        filename = '../data/TA_baseline_static_test';
+        filename = 'data/TA_baseline_static_test';
         [model_thrust, m_flow] = model_interpolation(filename,1.652000,t);
         
         dmrdt = -m_flow;
@@ -91,7 +91,7 @@ function [vars_dt] = eqns(t,vars, method)
             vars_dt = vars_dt';
             return
         else if (position(3) < launch_rail_length*sin(launch_angle)) % Rocket is still on launch rail.
-                velocity_heading = [cos(launch_angle), 0, sin(launch_angle)];
+                velocity_heading = [1, 0, sin(launch_angle)];
                 velocity_heading = velocity_heading ./ norm(velocity_heading);
             
                 q_inf = 0.5 .* density_air * norm(velocity).^2; % Dynamic pressure

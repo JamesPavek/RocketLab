@@ -90,7 +90,7 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 % Find initial velocity based on the calculated ISP and ideal rocket equation.
 final_mass = bottle_mass;
 
-[vx,vy,vz] = model_tsiolkovsky(1.12,gravity,launch_angle,mass_rocket_initial,final_mass)
+[vx,vy,vz] = model_tsiolkovsky(1.12,gravity,launch_angle,mass_rocket_initial,final_mass);
 
 velocity_initial = [vx vy vz];                                                            % [m/s] Initial velocity
 volume_water_initial = 0;
