@@ -33,11 +33,23 @@ S1_zvector = [S1(2) S1_height];
 S2_zvector = [S2(2) S2_height];
 S3_zvector = [S3(2) S3_height];
 
-% plot apex position vectors
-plot3(x_vector(1,:),y_vector,S1_zvector,'-b',x_vector(2,:),y_vector,S2_zvector,'-b',x_vector(3,:),y_vector,S3_zvector,'-b')
-grid on
-
 % calculate and return mean apex height from all three positions [m]
 height = mean([S1_height S2_height S3_height]);
+
+% determine apex position [m]
+x_pos = d*ft2m*sind(alpha)/2;
+y_pos = d*ft2m*cosd(alpha)/2;
+
+% plot apex position vectors
+h = plot3(x_vector(1,:),y_vector,S1_zvector,'-b',x_vector(2,:),y_vector,S2_zvector,'-g',x_vector(3,:),y_vector,S3_zvector,'-c',x_pos,y_pos,height,'ro');
+grid on
+set(h(4),'MarkerEdgeColor','none','MarkerFaceColor','r')
+xlabel('Baseline Distance [m]');
+ylabel('Downrange Distance [m]');
+zlabel('Height [m]');
+title('Data Sheet Apex Determination Plot');
+legend('S1','S2','S3','Apex','Location','SouthOutside');
+
+
 
 end
