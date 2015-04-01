@@ -1,21 +1,19 @@
-function [thrust, m_flow] = model_interpolation(filename, time)
+function [I_sp] = model_interpolation_isp(filename)
     
 %% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
 %% ASEN2004 - Lab 2 - Simulated Bottle Rocket
 %% Interpolation Model Function
 
-%% Purpose: To use static test data to model thrust and mass flow rate over time
+%% Purpose: To use static test data to calculate Isp
 
 %{
 | Inputs      | Units | Description           |
 |-------------+-------+-----------------------|
 | filename    | N/A   | Static test data file |
-| time        | s     | Time                  |
 
-| Outputs | Units | Description                              |
-|---------+-------+------------------------------------------|
-| thrust  | N     | Thrust at time in sample data            |
-| m_flow  | kg/s  | Calculated mass flow rate in sample data |
+| Outputs | Units | Description              |
+|---------+-------+--------------------------|
+| isp     | s     | Rocket thrust efficiency |
 %}
 
 global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
@@ -48,15 +46,6 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
         count = length(T_data);
         x_axis = 1:count;
 
-        % determine if desired time is within thrust phase
-        if time > (count*sample_t)
-            m_flow = 0;
-            v_e = 0;
-            thrust = 0;
-            I_sp = 0;
-            return
-        end
-
         % determine accelerometer offset
         ref_nom = zeros(count,1);
         ref_offset = (linspace(0,min(load_sum),count))'; % [lbf]
@@ -74,29 +63,8 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
 
         % determine specific impulse of adjusted data using numerical integration
         x_sp = linspace(0,(count*sample_t),count);
-        %I_sp = trapz(x_sp,T_data_adj)./(gravity*mass_water_initial); % [s]
+        I_sp = abs(trapz(x_sp,T_data_adj)./(gravity*mass_water_initial)); % [s]
 
-        % calculate propellent mass flow rate and exit velocity using thrust data
-        % for desired time
-        index = (time/sample_t);
-        if (time ==0)
-            i = 1;
-            j = 2;
-        else 
-            j = ceil(index);
-            i = floor(index);
-        end
-        if (i ~= 0 && j ~=0)
-            thrust = T_data_adj(i)+(T_data_adj(j) - T_data_adj(i))*((index - i)/(j-i));
-            v_e = sqrt(thrust/(density_air*throat_area));
-            m_flow = density_air*throat_area*v_e;
-        else
-            thrust = 0;
-            m_flow = 0;
         end
 
-
-
-
-        
-        end
+    

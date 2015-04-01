@@ -6,12 +6,11 @@
 
 %% Constants
 
-global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
+global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data friction_coefficient
 
 
 %% Material and Atmospheric Constants
-velocity_wind = [1 1 0];                                                                  % [m/hr] Wind speed
-velocity_wind = convvel(velocity_wind,'mph','m/s');
+velocity_wind = wind_vector(0,'N');     % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -21,6 +20,7 @@ temperature_initial = 300.0;                                                    
 velocity_initial = [0 0 0];                                                               % [m/s^2] Initial velocity
 bottle_mass = 0.15;                                                                       % [kg] Bottle mass
 launch_rail_length = 0.6;                                                                 % [m] Measured from cg to end of rail
+friction_coefficient = 0.0;             % [N/A] Friction coefficient of each launch rods (mu_k)
 
 %% Bottle Dimensions and Weights
 drag_coeff = 0.3;                                                                         % [N/A] Drag coefficient of rocket
@@ -88,9 +88,11 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 %% Tsiolkovsky Case
 
 % Find initial velocity based on the calculated ISP and ideal rocket equation.
+
 final_mass = bottle_mass;
 
-[vx,vy,vz] = model_tsiolkovsky(1.12,gravity,launch_angle,mass_rocket_initial,final_mass);
+I_sp = model_interpolation_isp('data/TA_baseline_static_test');
+[vx,vy,vz] = model_tsiolkovsky(I_sp,gravity,launch_angle,mass_rocket_initial,final_mass);
 
 velocity_initial = [vx vy vz];                                                            % [m/s] Initial velocity
 volume_water_initial = 0;
@@ -121,7 +123,7 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 
 
 velocity_initial = [0 0 0];                                                               % [m/s] Initial velocity
-volume_water_initial = 0;
+volume_water_initial = 0.001;
 mass_water_initial = volume_water_initial * density_water;                                % [kg] Initial mass of water
 volume_initial = volume_bottle;                                                           % Initial volume of air in bottle
 volume_initial = volume_bottle-volume_water_initial;                                      % Initial volume of air in bottle

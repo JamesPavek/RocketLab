@@ -24,7 +24,7 @@ function [vars_dt] = eqns(t,vars, method)
 
 
 %}
-    global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
+    global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data friction_coefficient
 
     position = [vars(1) vars(2) vars(3)];
     velocity = [vars(4) vars(5) vars(6)];
@@ -67,7 +67,7 @@ function [vars_dt] = eqns(t,vars, method)
                                                             % Assumes static performance is the same as in flight}
                                                             % No pressure, no water. Air is at ambient pressure.
         filename = 'data/TA_baseline_static_test';
-        [model_thrust, m_flow] = model_interpolation(filename,1.652000,t);
+        [model_thrust, m_flow] = model_interpolation(filename,t);
         
         dmrdt = -m_flow;
         dVdt = 0;
@@ -82,40 +82,45 @@ function [vars_dt] = eqns(t,vars, method)
 
 
 
-        %% Trajectory equations solved for all cases
+    %% Trajectory equations solved for all cases
 
-        if (position(3) <= 0)               % Rocket is on ground. Use 0 for all derivatives and return.
-            for i=1:length(vars)
-                vars_dt(i) = 0.0;
-            end
-            vars_dt = vars_dt';
-            return
-        else if (position(3) < launch_rail_length*sin(launch_angle)) % Rocket is still on launch rail.
-                velocity_heading = [1, 0, sin(launch_angle)];
-                velocity_heading = velocity_heading ./ norm(velocity_heading);
-            
-                q_inf = 0.5 .* density_air * norm(velocity).^2; % Dynamic pressure
-            
-        else
-            velocity_rel = velocity - velocity_wind;
-            velocity_heading = velocity_rel ./ norm(velocity_rel); % Rocket is on neither
-        
-            q_inf = 0.5 .* density_air * norm(velocity_rel).^2; % Dynamic pressure
-        
+    if (position(3) <= 0)               % Rocket is on ground. Use 0 for all derivatives and return.
+        for i=1:length(vars)
+            vars_dt(i) = 0.0;
         end
-        force_drag =  q_inf .* bottle_area .* drag_coeff; % Force_Drag due to bottle area. Only in direction of relative velocity.
-        force_x = (force_thrust-force_drag)*velocity_heading(1);
-        force_y = (force_thrust-force_drag)*velocity_heading(2);
-        force_z = (force_thrust-force_drag)*velocity_heading(3) + mass_rocket*gravity;
-        force_vec = [force_x force_y force_z];
-        dvdt = force_vec./mass_rocket;
+        vars_dt = vars_dt';
+        return
+    else if (position(3) < launch_rail_length*sin(launch_angle)) % Rocket is still on launch rail.
+            velocity_heading = [1, 0, sin(launch_angle)];
+            velocity_heading = velocity_heading ./ norm(velocity_heading);
+            
+            force_friction = mass_rocket*gravity*friction_coefficient*2;
+            
+            q_inf = 0.5 .* density_air * norm(velocity).^2; % Dynamic pressure
+            
+    else
+        velocity_rel = velocity - velocity_wind;
+        velocity_heading = velocity_rel ./ norm(velocity_rel); % Rocket is on neither
+        force_friction = 0;
+        
+        q_inf = 0.5 .* density_air * norm(velocity_rel).^2; % Dynamic pressure
+        
+    end
+        
+    force_drag =  q_inf .* bottle_area .* drag_coeff; % Force_Drag due to bottle area. Only in direction of relative velocity.
+        
+    force_x = (force_thrust-force_drag - force_friction)*velocity_heading(1);
+    force_y = (force_thrust-force_drag - force_friction)*velocity_heading(2);
+    force_z = (force_thrust-force_drag - force_friction)*velocity_heading(3) + mass_rocket*gravity;
+    force_vec = [force_x force_y force_z];
+    dvdt = force_vec./mass_rocket;
 
     
-        dposdt = velocity;
+    dposdt = velocity;
    
 
-        %% Return final derivates
-        vars_dt = [[dposdt]'; [dvdt]'; dVdt; dmrdt; dmadt];
+    %% Return final derivates
+    vars_dt = [[dposdt]'; [dvdt]'; dVdt; dmrdt; dmadt];
 
-        return
-    end
+    return
+end
