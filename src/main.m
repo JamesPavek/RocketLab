@@ -10,7 +10,7 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
 
 
 %% Material and Atmospheric Constants
-velocity_wind = wind_vector(0,'N');     % [m/s] Wind vector
+velocity_wind = wind_vector(0,'N');                                                       % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -20,10 +20,10 @@ temperature_initial = 300.0;                                                    
 velocity_initial = [0 0 0];                                                               % [m/s^2] Initial velocity
 bottle_mass = 0.15;                                                                       % [kg] Bottle mass
 launch_rail_length = 0.6;                                                                 % [m] Measured from cg to end of rail
-friction_coefficient = 0.0;             % [N/A] Friction coefficient of each launch rods (mu_k)
+friction_coefficient = 0.0;                                                               % [N/A] Friction coefficient of each launch rods (mu_k)
 
 %% Bottle Dimensions and Weights
-drag_coeff = 0.3;                                                                         % [N/A] Drag coefficient of rocket
+drag_coeff = 0.2;                                                                         % [N/A] Drag coefficient of rocket
 discharge_coeff = .9;                                                                     % [N/A] Nozzle efficiency of the rocket
 volume_bottle = 0.002;                                                                    % [m^3] Volume of bottle
 volume_water_initial = 0.001;                                                             % [m^3] Initial volume of water in bottle
@@ -33,10 +33,10 @@ pressure_gage = convpres(pressure_gage,'psi','Pa');
 pressure_absolute = pressure_gage+pressure_ambient;                                       % [Pa] Intial absolute pressure of air in bottle
 
 bottle_diameter=.109;                                                                     % [m] Diameter of bottle
-bottle_area = (pi*bottle_diameter^2);
+bottle_area = (pi*(bottle_diameter/2)^2);
 
 throat_diameter=.021;                                                                     % [m] Diameter of nozzle/throat
-throat_area = (pi*throat_diameter^2);
+throat_area = (pi*(throat_diameter/2)^2);
 
 
 
@@ -89,20 +89,13 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 
 % Find initial velocity based on the calculated ISP and ideal rocket equation.
 
-final_mass = bottle_mass;
+final_mass = bottle_mass + mass_air_initial;
 
 I_sp = model_interpolation_isp('data/TA_baseline_static_test');
+
 [vx,vy,vz] = model_tsiolkovsky(I_sp,gravity,launch_angle,mass_rocket_initial,final_mass);
 
 velocity_initial = [vx vy vz];                                                            % [m/s] Initial velocity
-volume_water_initial = 0;
-mass_water_initial = 0;
-volume_initial = volume_bottle;                                                           % Initial volume of air in bottle
-pressure_absolute = pressure_ambient;
-mass_air_initial = (pressure_absolute/(gas_constant*temperature_initial))*volume_initial; % [kg] Initial mass of air
-
-pressure_end = pressure_absolute*(volume_initial/volume_bottle)^1.4;                      % [Pa] Pressure at end of phase one;
-mass_rocket_initial = mass_water_initial+mass_air_initial+bottle_mass;                    % [kg] initial mass of rocket
 
 vars_init(1) = pos_initial(1);
 vars_init(2) = pos_initial(2);
@@ -123,15 +116,6 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 
 
 velocity_initial = [0 0 0];                                                               % [m/s] Initial velocity
-volume_water_initial = 0.001;
-mass_water_initial = volume_water_initial * density_water;                                % [kg] Initial mass of water
-volume_initial = volume_bottle;                                                           % Initial volume of air in bottle
-volume_initial = volume_bottle-volume_water_initial;                                      % Initial volume of air in bottle
-pressure_absolute = pressure_ambient;
-mass_air_initial = (pressure_absolute/(gas_constant*temperature_initial))*volume_initial; % [kg] Initial mass of air
-
-pressure_end = pressure_absolute*(volume_initial/volume_bottle)^1.4;                      % [Pa] Pressure at end of phase one;
-mass_rocket_initial = mass_water_initial+mass_air_initial+bottle_mass;                    % [kg] initial mass of rocket
 
 vars_init(1) = pos_initial(1);
 vars_init(2) = pos_initial(2);

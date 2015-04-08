@@ -51,7 +51,7 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
         % determine if desired time is within thrust phase
         if time > (count*sample_t)
             m_flow = 0;
-            v_e = 0;
+            exit_velocity = 0;
             thrust = 0;
             I_sp = 0;
             return
@@ -66,11 +66,7 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
         % plot(x_axis,T_data,'-b',x_axis,ref_nom,'-g',x_axis,ref_offset,'-r')
 
         % adjust data for accelerometer offset and convert to N
-        T_data_adj = (T_data - ref_offset)*4.44822162; % [N]
-
-        % plot adjusted data
-        % figure
-        % plot(x_axis,T_data_adj,'-b',x_axis,ref_nom,'-g')
+        T_data_adj = convforce((T_data - ref_offset),'lbf','N');
 
         % determine specific impulse of adjusted data using numerical integration
         x_sp = linspace(0,(count*sample_t),count);
@@ -88,15 +84,12 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
         end
         if (i ~= 0 && j ~=0)
             thrust = T_data_adj(i)+(T_data_adj(j) - T_data_adj(i))*((index - i)/(j-i));
-            v_e = sqrt(thrust/(density_air*throat_area));
-            m_flow = density_air*throat_area*v_e;
+            exit_velocity = sqrt(thrust/(density_water*throat_area));
+            m_flow = -density_water*throat_area*exit_velocity;
         else
             thrust = 0;
             m_flow = 0;
         end
 
-
-
-
         
-        end
+    end

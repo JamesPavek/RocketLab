@@ -69,7 +69,7 @@ function [vars_dt] = eqns(t,vars, method)
         filename = 'data/TA_baseline_static_test';
         [model_thrust, m_flow] = model_interpolation(filename,t);
         
-        dmrdt = -m_flow;
+        dmrdt = m_flow;
         dVdt = 0;
         dmadt = 0;
         force_thrust = model_thrust;
@@ -77,7 +77,6 @@ function [vars_dt] = eqns(t,vars, method)
       otherwise
         error('None of the three cases!');
     end
-
 
 
 
@@ -106,18 +105,18 @@ function [vars_dt] = eqns(t,vars, method)
         q_inf = 0.5 .* density_air * norm(velocity_rel).^2; % Dynamic pressure
         
     end
-        
+    
     force_drag =  q_inf .* bottle_area .* drag_coeff; % Force_Drag due to bottle area. Only in direction of relative velocity.
-        
-    force_x = (force_thrust-force_drag - force_friction)*velocity_heading(1);
-    force_y = (force_thrust-force_drag - force_friction)*velocity_heading(2);
-    force_z = (force_thrust-force_drag - force_friction)*velocity_heading(3) + mass_rocket*gravity;
+    
+    force_x = (force_thrust - force_drag - force_friction)*velocity_heading(1);
+    force_y = (force_thrust - force_drag - force_friction)*velocity_heading(2);
+    force_z = (force_thrust - force_drag - force_friction)*velocity_heading(3) + mass_rocket*gravity;
     force_vec = [force_x force_y force_z];
     dvdt = force_vec./mass_rocket;
 
     
     dposdt = velocity;
-   
+    
 
     %% Return final derivates
     vars_dt = [[dposdt]'; [dvdt]'; dVdt; dmrdt; dmadt];
