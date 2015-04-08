@@ -10,6 +10,9 @@ close all; clear all; clc;
 % Start Stopwatch
 tic
 
+% Open Text File to Write Data Tables to
+fileID = fopen('Dependent_Sensitivity_Data.txt','w');
+
 %% Constants
 
 global Test_Stand_File pressure_ambient density_water volume_bottle pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data
@@ -21,7 +24,6 @@ ode_options = odeset('AbsTol',1e-7,'RelTol',1e-7);
 wind_speed = 0;
 wind_direction = 'NW';
 velocity_wind = windvector(wind_speed,wind_direction);
-velocity_wind = [0 10 0];                                                                 % [m/hr] Wind speed
 velocity_wind = convvel(velocity_wind,'mph','m/s');
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
@@ -70,6 +72,9 @@ mass_rocket_initial = mass_water_initial+mass_air_initial+bottle_mass;          
 
 %% Parameter 1, Varying Water Volume
 fprintf('\n----- Parameter 1 -----\n');
+fprintf(fileID,'----- Parameter 1 -----\n');
+fprintf(fileID,'Varying Water Volume\n');
+fprintf(fileID,'\nVolume Water (ml)     Distance Traveled (m)\n\n');
 % Set parameter and fill parameter vector
 volume_water_initial = [750 1000];
 B = volume_water_initial;
@@ -105,6 +110,8 @@ method = 'interpolation_sensitivity';
 
 A(i) = max(vars(:,1));
 
+fprintf(fileID,'%5d                 %5.1f\n',B(i),A(i));
+
 clear vars
 i = i + 1;
 end
@@ -122,6 +129,9 @@ volume_water_initial = 0.001;
 
 %% Parameter 2, Varying Propellent Density
 fprintf('\n----- Parameter 2 -----\n');
+fprintf(fileID,'----- Parameter 2 -----\n');
+fprintf(fileID,'Varying Propellant Density\n');
+fprintf(fileID,'\nDensity Water (kg/m^3)     Distance Traveled (m)\n\n');
 % Set parameter and fill parameter vector
 density_water = [1000];
 B = density_water;
@@ -155,6 +165,8 @@ method = 'interpolation_sensitivity';
 [t,vars] = ode45(@(t,vars) eqns(t,vars',method),[0 10], vars_init,ode_options);
 
 A(i) = max(vars(:,1));
+
+fprintf(fileID,'%5d                      %5.1f\n',B(i),A(i));
 
 clear vars
 i = i + 1;
