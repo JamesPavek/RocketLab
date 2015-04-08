@@ -11,7 +11,7 @@ close all; clear all; clc;
 tic
 
 % Set number of loops
-Loop_Number = 100;
+Loop_Number = 10;
 
 %% Set uncertainties
 std_wind = 1; % mph
