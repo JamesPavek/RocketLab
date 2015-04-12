@@ -10,7 +10,7 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
 
 
 %% Material and Atmospheric Constants
-velocity_wind = wind_vector(4,'N');                                                       % [m/s] Wind vector
+velocity_wind = wind_vector(5,'W');                                                       % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -98,8 +98,6 @@ end
 
 thrust_data = mean_thrust ./ num_files;
 
-thrust_data = data(3).thrust;
-
 
 
 %% Thermodynamic Model Initial Conditions
@@ -153,9 +151,7 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 
 final_mass = bottle_mass + mass_air_initial;
 
-
-
-I_sp = model_interpolation_isp('/Users/James/Documents/git/RocketLab/src/data/TA_baseline_static_test'); % TODO 
+I_sp = model_interpolation_isp(thrust_data)
 
 [vx,vy,vz] = model_tsiolkovsky(I_sp,gravity,launch_angle,mass_rocket_initial,final_mass);
 
