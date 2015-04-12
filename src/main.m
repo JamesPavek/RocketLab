@@ -57,9 +57,16 @@ for i = 1:num_files
     %% Crop to important sections (TODO)
     
     
-    start = find(data(i).thrust_raw>100,1);
-    start = start - 20;
-    [~,finish] = min(data(i).thrust_raw);
+    [~,start] = max(data(i).thrust_raw);
+    start = start - 30;
+    if (start < 1)
+        start = 1;
+    end 
+    
+    end_data = data(i).thrust_raw(start:end);
+    [~,finish] = min(end_data);
+    
+    finish = finish + start;
     
     count = length(start:finish);
 
@@ -69,7 +76,7 @@ for i = 1:num_files
     
     data(i).time = (1:length(data(i).thrust))./sample_freq;
     
-    data(i).total_time = (1:length(data(i).thrust))./sample_freq;
+    data(i).total_time = (length(data(i).thrust))./sample_freq;
     
 
 end
@@ -95,8 +102,23 @@ for i = 1:num_files
 
 end
 
-
 thrust_data = mean_thrust ./ num_files;
+
+figure; 
+hold on;
+set(gca,'DefaultTextInterpreter', 'latex');
+set(gca,'fontsize',18);
+set(gca,'XMinorTick','on');
+set(gca,'YMinorTick','on');
+
+plot(thrust_data);
+
+legend('Thrust Data');
+title('Thrust Data'); 
+xlabel('Time (s)');
+ylabel('Thrust (N)');
+
+
 
 
 
