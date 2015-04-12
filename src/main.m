@@ -6,11 +6,11 @@
 
 %% Constants
 
-global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial test_data friction_coefficient
+global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient thrust_data sample_freq
 
 
 %% Material and Atmospheric Constants
-velocity_wind = wind_vector(0,'N');                                                       % [m/s] Wind vector
+velocity_wind = wind_vector(4,'N');                                                       % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -37,6 +37,68 @@ bottle_area = (pi*(bottle_diameter/2)^2);
 
 throat_diameter=.021;                                                                     % [m] Diameter of nozzle/throat
 throat_area = (pi*(throat_diameter/2)^2);
+
+%% Thrust Data
+sample_freq = 1652.00;                  % [Hz]
+
+files = dir('data/model/Group*');
+num_files = length(dir('data/model/Group*'));
+
+for i = 1:num_files
+    
+    %% Read in all files in data/
+    
+    filename = strcat('data/model/',files(i).name);
+    data_temp = load(filename, '-ascii'); % Note: for now all group tests are included 
+    data_temp = convforce(data_temp,'lbf','N');
+    
+    data(i).thrust_raw = data_temp(:,3);
+    
+    %% Crop to important sections (TODO)
+    
+    
+    start = find(data(i).thrust_raw>100,1);
+    start = start - 20;
+    [~,finish] = min(data(i).thrust_raw);
+    
+    count = length(start:finish);
+
+    data_offset = linspace(0,min(data(i).thrust_raw),count)';
+
+    data(i).thrust = data(i).thrust_raw(start:finish) - data_offset;
+    
+    data(i).time = (1:length(data(i).thrust))./sample_freq;
+    
+    data(i).total_time = (1:length(data(i).thrust))./sample_freq;
+    
+
+end
+
+%% Mean Thrust
+mean_thrust = [];
+
+for i = 1:num_files                     
+    for j = 1:length(data(i).thrust)
+        
+        value = data(i).thrust(j);
+        if (i == 1)
+            mean_thrust(j) = value;
+        else 
+            
+            if(length(mean_thrust)<length(data(i).thrust) && j>length(mean_thrust))
+                mean_thrust(j) = 0;
+            else
+                mean_thrust(j) = mean_thrust(j) + value;
+            end
+        end
+    end
+
+end
+
+
+thrust_data = mean_thrust ./ num_files;
+
+thrust_data = data(3).thrust;
 
 
 
@@ -65,7 +127,7 @@ t_span = [0 10];
 ode_options = odeset('AbsTol',1e-14,'RelTol',1e-14);
 
 method = 'thermodynamic';
-[t,vars] = ode45(@(t,vars) eqns(t,vars',method),[0 10], vars_init,ode_options);
+[t,vars] = ode45(@(t,vars) eqns(t,vars',method),t_span, vars_init,ode_options);
 
 figure; 
 hold on;
@@ -91,7 +153,9 @@ plot3(vars(:,1),vars(:,2),vars(:,3));
 
 final_mass = bottle_mass + mass_air_initial;
 
-I_sp = model_interpolation_isp('data/TA_baseline_static_test');
+
+
+I_sp = model_interpolation_isp('/Users/James/Documents/git/RocketLab/src/data/TA_baseline_static_test'); % TODO 
 
 [vx,vy,vz] = model_tsiolkovsky(I_sp,gravity,launch_angle,mass_rocket_initial,final_mass);
 
@@ -108,7 +172,7 @@ vars_init(8) = mass_rocket_initial;
 vars_init(9) = mass_air_initial;
 
 method = 'tsiolkovsky';
-[t,vars] = ode45(@(t,vars) eqns(t,vars',method),[0 10], vars_init,ode_options);
+[t,vars] = ode45(@(t,vars) eqns(t,vars',method),t_span, vars_init,ode_options);
 
 plot3(vars(:,1),vars(:,2),vars(:,3));
 
@@ -128,8 +192,25 @@ vars_init(8) = mass_rocket_initial;
 vars_init(9) = mass_air_initial;
 
 method = 'interpolation';
-[t,vars] = ode45(@(t,vars) eqns(t,vars',method),[0 10], vars_init,ode_options);
+[t,vars] = ode45(@(t,vars) eqns(t,vars',method),t_span, vars_init,ode_options);
 
 plot3(vars(:,1),vars(:,2),vars(:,3));
 
+% axis equal tight
+xlim([0 100]);
+ylim([-25 25]);
+zlim([0 50]);
 legend('Thermodynamic','Tsiolkovsky','Interpolation');
+
+%% Flight Predictions
+
+max_distance = norm([vars(end,1), vars(end,2), vars(end,3)]);
+max_distance = convlength(max_distance,'m','ft')
+
+drift_angle = atan(vars(end,2)./vars(end,1));
+drift_angle = radtodeg(drift_angle)
+
+last_time = vars(end,3);
+mission_time = find(vars(:,3)~=last_time,1,'last');
+
+air_time = t(mission_time)

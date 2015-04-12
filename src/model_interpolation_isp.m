@@ -23,13 +23,8 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
         sample_freq = 1.652000;
         sample_t = 1/(sample_freq*1000); % sample interval [s]
 
-        % load static test data
-        if (isempty(test_data))
-            loading = load(filename);
-            test_data = loading;
-        else
-            loading = test_data;
-        end
+        loading = load(filename);
+
         load_sum = loading(:,3); % load cell summed force [lbf]
                                  % count = length(load_sum);
                                  % main_x_axis = (1:count)';

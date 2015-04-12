@@ -56,7 +56,7 @@ function [velocity_wind] = wind_vector(magnitude,direction)
       case 'WSW'        
         phi = 68.5;
     end
-    velocity_wind = [magnitude*-cosd(phi - theta) magnitude*sind(phi - theta) 0];
+    velocity_wind = [magnitude*-cosd(phi - theta),magnitude*sind(phi - theta), 0];
 
 end
 

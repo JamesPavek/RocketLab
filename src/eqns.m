@@ -66,8 +66,8 @@ function [vars_dt] = eqns(t,vars, method)
                                                             % Requires static tests for any condition changes
                                                             % Assumes static performance is the same as in flight}
                                                             % No pressure, no water. Air is at ambient pressure.
-        filename = 'data/TA_baseline_static_test';
-        [model_thrust, m_flow] = model_interpolation(filename,t);
+
+        [model_thrust, m_flow] = model_interpolation(t);
         
         dmrdt = m_flow;
         dVdt = 0;
@@ -120,6 +120,11 @@ function [vars_dt] = eqns(t,vars, method)
 
     %% Return final derivates
     vars_dt = [[dposdt]'; [dvdt]'; dVdt; dmrdt; dmadt];
+    
+    if (~isreal(vars_dt))
+
+        print 'x'
+    end
 
     return
 end
