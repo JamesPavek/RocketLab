@@ -90,7 +90,8 @@ function [vars_dt] = eqns(t,vars, method)
         vars_dt = vars_dt';
         return
     else if (position(3) < launch_rail_length*sin(launch_angle)) % Rocket is still on launch rail.
-            velocity_heading = [1, 0, sin(launch_angle)];
+
+            velocity_heading = [cos(launch_angle), 0, sin(launch_angle)];
             velocity_heading = velocity_heading ./ norm(velocity_heading);
             
             force_friction = mass_rocket*gravity*friction_coefficient*2;
@@ -121,10 +122,6 @@ function [vars_dt] = eqns(t,vars, method)
     %% Return final derivates
     vars_dt = [[dposdt]'; [dvdt]'; dVdt; dmrdt; dmadt];
     
-    if (~isreal(vars_dt))
-
-        print 'x'
-    end
 
     return
 end

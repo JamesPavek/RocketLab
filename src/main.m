@@ -10,7 +10,7 @@ global pressure_ambient density_water volume_bottle discharge_coeff pressure_abs
 
 
 %% Material and Atmospheric Constants
-velocity_wind = wind_vector(5,'W');                                                       % [m/s] Wind vector
+velocity_wind = wind_vector(0,'W');                                                       % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -41,21 +41,21 @@ throat_area = (pi*(throat_diameter/2)^2);
 %% Thrust Data
 sample_freq = 1652.00;                  % [Hz]
 
-files = dir('data/model/Group*');
-num_files = length(dir('data/model/Group*'));
+files = dir('data/Class Static Tests/Tested and Good/Group*');
+num_files = length(dir('data/Class Static Tests/Tested and Good/Group*'));
 
 for i = 1:num_files
     
     %% Read in all files in data/
     
-    filename = strcat('data/model/',files(i).name);
+    filename = strcat('data/Class Static Tests/Tested and Good/',files(i).name);
     data_temp = load(filename, '-ascii'); % Note: for now all group tests are included 
+
     data_temp = convforce(data_temp,'lbf','N');
     
     data(i).thrust_raw = data_temp(:,3);
     
-    %% Crop to important sections (TODO)
-    
+    %% Crop to important sections
     
     [~,start] = max(data(i).thrust_raw);
     start = start - 30;
@@ -64,8 +64,21 @@ for i = 1:num_files
     end 
     
     end_data = data(i).thrust_raw(start:end);
-    [~,finish] = min(end_data);
     
+    [~,finish] = min(end_data);
+
+    if (finish < 330)                   % Short air puff causes this usally. Min/max isn't good enough to check, so check manually.
+        
+        marker1 = finish;                
+        end_data = end_data(finish+50:end);
+        
+
+        [~,marker2] = min(end_data);
+        
+        finish = marker2 + 50 + marker1;
+
+    end
+
     finish = finish + start;
     
     count = length(start:finish);
@@ -80,6 +93,8 @@ for i = 1:num_files
     
 
 end
+    
+
 
 %% Mean Thrust
 mean_thrust = [];
@@ -104,6 +119,7 @@ end
 
 thrust_data = mean_thrust ./ num_files;
 
+
 figure; 
 hold on;
 set(gca,'DefaultTextInterpreter', 'latex');
@@ -112,8 +128,9 @@ set(gca,'XMinorTick','on');
 set(gca,'YMinorTick','on');
 
 plot(thrust_data);
+plot(data(10).thrust);
 
-legend('Thrust Data');
+legend('Mean Thrust Data','File 10 Thrust Data');
 title('Thrust Data'); 
 xlabel('Time (s)');
 ylabel('Thrust (N)');
@@ -123,7 +140,7 @@ ylabel('Thrust (N)');
 
 
 %% Thermodynamic Model Initial Conditions
-pos_initial = [0 0 0.1];                                                                  % [m] Initial position
+pos_initial = [0 0 0.01];                                                                  % [m] Initial position
 launch_angle = pi/4;                                                                      % [rad] Launch angle
 velocity_initial = [0 0 0];                                                               % [m/s] Initial velocity
 mass_water_initial = volume_water_initial*density_water;                                  % [kg] Initial mass of water
