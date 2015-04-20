@@ -24,9 +24,9 @@ function [vars_dt] = eqns(t,vars, method)
 
 
 %}
-    global velocity_windx velocity_windy velocity_windz pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air mass_rocket_initial launch_angle launch_rail_length mass_water_initial test_data friction_coefficient
+    global velocity_wind_x velocity_wind_y velocity_wind_z pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air mass_rocket_initial launch_angle launch_rail_length mass_water_initial test_data friction_coefficient
 
-    velocity_wind = [velocity_windx, velocity_windy, velocity_windz];
+    velocity_wind = [velocity_wind_x, velocity_wind_y, velocity_wind_z];
     position = [vars(1) vars(2) vars(3)];
     velocity = [vars(4) vars(5) vars(6)];
     volume_air = vars(7);

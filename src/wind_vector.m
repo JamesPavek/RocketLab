@@ -1,4 +1,4 @@
-function [velocity_wind] = wind_vector(magnitude,direction)
+function [velocity_wind_x, velocity_wind_y, velocity_wind_z] = wind_vector(magnitude,direction)
 %% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
 %% ASEN2004 - Lab 2 - Simulated Bottle Rocket
 %% Wind Vector Function
@@ -56,7 +56,9 @@ function [velocity_wind] = wind_vector(magnitude,direction)
       case 'WSW'        
         phi = 68.5;
     end
-    velocity_wind = [magnitude*-cosd(phi - theta),magnitude*sind(phi - theta), 0];
+    velocity_wind_x = magnitude*-cosd(phi - theta);
+    velocity_wind_y = magnitude*sind(phi - theta);
+    velocity_wind_z = 0;
 
 end
 

@@ -6,18 +6,11 @@
 
 %% Constants
 
-global velocity_windx velocity_windy velocity_windz pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air mass_rocket_initial launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient sample_freq
+global velocity_wind_x velocity_wind_y velocity_wind_z pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air mass_rocket_initial launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient sample_freq
 
 
 %% Material and Atmospheric Constants
-<<<<<<< HEAD
-velocity_wind = wind_vector(0,'W');                                                       % [m/s] Wind vector
-=======
-velocity_wind = wind_vector(5,'W');                                                       % [m/s] Wind vector
-velocity_windx = velocity_wind(1);
-velocity_windy = velocity_wind(2);
-velocity_windz = velocity_wind(3);
->>>>>>> 67bc027b192a7b97b363374c5be8b1693bdb817a
+[velocity_wind_x velocity_wind_y velocity_wind_z] = wind_vector(0,'W');                                                       % [m/s] Wind vector
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -134,10 +127,10 @@ set(gca,'fontsize',18);
 set(gca,'XMinorTick','on');
 set(gca,'YMinorTick','on');
 
-plot(thrust_data);
-plot(data(10).thrust);
+plot((1:length(thrust_data))./sample_freq,thrust_data);
+plot((1:length(data(10).thrust))./sample_freq,data(10).thrust);
 
-legend('Mean Thrust Data','File 10 Thrust Data');
+legend('Mean Thrust Data','Representative Thrust Data');
 title('Thrust Data'); 
 xlabel('Time (s)');
 ylabel('Thrust (N)');
