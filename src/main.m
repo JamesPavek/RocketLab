@@ -6,11 +6,18 @@
 
 %% Constants
 
-global pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial pressure_absolute launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient thrust_data sample_freq
+global velocity_windx velocity_windy velocity_windz pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air mass_rocket_initial launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient sample_freq
 
 
 %% Material and Atmospheric Constants
+<<<<<<< HEAD
 velocity_wind = wind_vector(0,'W');                                                       % [m/s] Wind vector
+=======
+velocity_wind = wind_vector(5,'W');                                                       % [m/s] Wind vector
+velocity_windx = velocity_wind(1);
+velocity_windy = velocity_wind(2);
+velocity_windz = velocity_wind(3);
+>>>>>>> 67bc027b192a7b97b363374c5be8b1693bdb817a
 density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
@@ -179,9 +186,6 @@ ylabel('y (m)');
 zlabel('z (m)');
 
 plot3(vars(:,1),vars(:,2),vars(:,3));
-
-
-
 
 
 %% Tsiolkovsky Case
