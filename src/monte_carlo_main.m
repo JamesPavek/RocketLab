@@ -1,45 +1,47 @@
 %% James Pavek, Noel Puldon, Haoyu Li, Jake Harrell, Nick Monahan, Aaron McCusker
 %% ASEN2004 - Lab 2 - Simulated Bottle Rocket
-%% Main Function
+%% Monte Carlo Simulation
 
-%% Purpose: Define constants and assess differences between models
+%% Purpose: Create a Monte Carlo Simulation of the possible landing area for the rocket
 
 clear all
 close all
 clc
 %% Constants
 
+set(0,'DefaultAxesFontSize',20)
+
 global velocity_windx velocity_windy velocity_windz pressure_ambient density_water volume_bottle discharge_coeff pressure_absolute gravity drag_coeff gas_constant volume_initial mass_air_initial pressure_end bottle_area throat_area temperature_initial density_air velocity_wind mass_rocket_initial launch_angle launch_rail_length mass_water_initial thrust_data friction_coefficient sample_freq
 
 tic
 
+LoopNumber = 5000;
 %% Set uncertainties
 std_wind = 3; % mph
-std_wind_direction = 1; % Cardinal Direction (Out of 16)
 std_temp = 1; % K
-std_bottle_mass = 0.001; % kg
-std_launch_rail = 0.01; % m
-std_drag = 0.05; % unitless
-std_discharge = 0.05; % unitless
-std_volume_water = 0.00001; % m^3
-std_pressure = 1; % psi
-std_launch_angle = 3 * (pi/180); % rad
-
+std_bottle_mass = 0.005; % kg
+std_launch_rail = 0; % m
+std_drag = 0.075; % unitless
+std_discharge = 0.1; % unitless
+std_volume_water = 0.000005; % m^3
+std_pressure = 2; % psi
+std_launch_angle = 2 * (pi/180); % rad
+std_Isp = 0.25;
 
 %% Material and Atmospheric Constants
-density_air = 1.042;                                                                      % [kg/m^3] Density of air
 gravity = -9.81;                                                                          % [m/s^2] Gravitation acceleration
 gas_constant = 287.15;                                                                    % [Specific gas constant of air]
 pressure_ambient = 101325;                                                                % [Pa] Ambient pressure
 density_water = 1000.0;                                                                   % [kg/m^3] Density of water
-temperature_initial = 300.0;                                                              % [k] Ambient air temperature
+temperature_initial = convtemp(60,'F','K');                                                              % [k] Ambient air temperature
 velocity_initial = [0 0 0];                                                               % [m/s^2] Initial velocity
-bottle_mass = 0.15;                                                                       % [kg] Bottle mass
+bottle_mass = 0.154;                                                                       % [kg] Bottle mass
 launch_rail_length = 0.6;                                                                 % [m] Measured from cg to end of rail
 friction_coefficient = 0.0;                                                               % [N/A] Friction coefficient of each launch rods (mu_k)
+density_air = pressure_ambient/(gas_constant*temperature_initial);                        % [kg/m^3] Density of air
 
 %% Bottle Dimensions and Weights
-drag_coeff = 0.2;                                                                         % [N/A] Drag coefficient of rocket
+drag_coeff = 0.25;                                                                         % [N/A] Drag coefficient of rocket
 discharge_coeff = .9;                                                                     % [N/A] Nozzle efficiency of the rocket
 volume_bottle = 0.002;                                                                    % [m^3] Volume of bottle
 volume_water_initial = 0.001;                                                             % [m^3] Initial volume of water in bottle
@@ -48,7 +50,7 @@ pressure_gage = 40.0;                                                           
 pressure_gage = convpres(pressure_gage,'psi','Pa');
 pressure_absolute = pressure_gage+pressure_ambient;                                       % [Pa] Intial absolute pressure of air in bottle
 
-bottle_diameter=.109;                                                                     % [m] Diameter of bottle
+bottle_diameter = .109;                                                                     % [m] Diameter of bottle
 bottle_area = (pi*(bottle_diameter/2)^2);
 
 throat_diameter=.021;                                                                     % [m] Diameter of nozzle/throat
@@ -120,6 +122,12 @@ end
 
 thrust_data = mean_thrust ./ num_files;
 
+thrust_data = mean_thrust ./ num_files;
+
+final_mass = bottle_mass + mass_air_initial;
+
+I_sp = 1.3972;
+
 %% Thermodynamic Model Initial Conditions
 pos_initial = [0 0 0.1];                                                                  % [m] Initial position
 launch_angle = pi/4;                                                                      % [rad] Launch angle
@@ -132,26 +140,26 @@ pressure_end = pressure_absolute*(volume_initial/volume_bottle)^1.4;            
 mass_rocket_initial = mass_water_initial+mass_air_initial+bottle_mass;                    % [kg] initial mass of rocket
 
 t_span = [0 10];
-ode_options = odeset('AbsTol',1e-8,'RelTol',1e-8);
+% ode_options = odeset('AbsTol',1e-8,'RelTol',1e-8);
+ode_options = odeset();
 
 %% Interpolation Method
 
 
 velocity_initial = [0 0 0];                                                               % [m/s] Initial velocity
 
-LoopNumber = 5;
-
 % Set the varibles so that the baseline isn't altered
-velocity_wind1 = 5;
-wind_direction = 'S';
+velocity_wind1 = 0;
+wind_direction = 'W';
 launch_angle1 = launch_angle;
 bottle_mass1 = bottle_mass;
 launch_rail_length1 = launch_rail_length;
 volume_water_initial1 = volume_water_initial;
-temp1 = convtemp(65,'F','K');
+temp1 = convtemp(60,'F','K');
 drag_coeff1 = drag_coeff;
 discharge_coeff1 = discharge_coeff;
 pressure_gage1 = pressure_gage;
+I_sp1 = I_sp;
 
 for i = 1:LoopNumber
     fprintf('Loop Number: %5.0f of %5.0f \n',i,LoopNumber)
@@ -168,6 +176,7 @@ for i = 1:LoopNumber
     clear drag_coeff
     clear discharge_coeff
     clear pressure_gage
+    clear I_sp
     
     % Vary Wind
     
@@ -214,6 +223,10 @@ for i = 1:LoopNumber
     pressure_gage = convpres(pressure_gage,'psi','Pa');
     pressure_absolute = pressure_gage + pressure_ambient;
     
+    % Vary Thrust Data
+    
+    I_sp = normrnd(I_sp1,std_Isp);
+    
     vars_init(1) = pos_initial(1);
     vars_init(2) = pos_initial(2);
     vars_init(3) = pos_initial(3);
@@ -223,13 +236,24 @@ for i = 1:LoopNumber
     vars_init(7) = volume_initial;
     vars_init(8) = mass_rocket_initial;
     vars_init(9) = mass_air_initial;
-    method = 'interpolation';
-    
-    [t,vars] = ode45(@(t,vars) eqns(t,vars',method),t_span, vars_init,ode_options);
-    
-    endpoints(i,:) = [vars(end,1) vars(end,2)];
-end
 
+    method = 'thermodynamic';
+    [t,vars1] = ode45(@(t,vars1) eqns(t,vars1',method),[0 10], vars_init,ode_options);
+    
+    final_mass = bottle_mass + mass_air_initial;
+    [vx,vy,vz] = model_tsiolkovsky(I_sp,gravity,launch_angle,mass_rocket_initial,final_mass);
+    
+    velocity_initial = [vx,vy,vz];                                                            % [m/s] Initial velocity
+    vars_init(4) = velocity_initial(1);
+    vars_init(5) = velocity_initial(2);
+    vars_init(6) = velocity_initial(3);
+    method = 'tsiolkovsky';
+    [t,vars2] = ode45(@(t,vars2) eqns(t,vars2',method),[0 10], vars_init,ode_options);
+    MaxValuesx = [vars1(end,1) vars2(end,1)];
+    MaxValuesy = [vars1(end,2) vars2(end,2)];
+    endpoints(i,:) = [mean(MaxValuesx) mean(MaxValuesy)];
+end
+endpoints;
 STDx  = std(endpoints(:,1));
 STDy  = std(endpoints(:,2));
 
@@ -254,6 +278,8 @@ y = get(h,'YData');
 
 Mean_X = mean(x);
 Mean_Y = mean(y);
+drift_angle = atand(mean(endpoints(:,2))/mean(endpoints(:,1)));
+Average_Distance = convlength(norm(mean(endpoints(:,1)),mean(endpoints(:,2))),'m','ft');
 
 figure
 hold on
@@ -261,18 +287,16 @@ plot(x + mean(endpoints(:,1)), y + mean(endpoints(:,2)),'red');
 plot(2*x + mean(endpoints(:,1)), 2*y + mean(endpoints(:,2)),'black');
 plot(3*x + mean(endpoints(:,1)), 3*y + mean(endpoints(:,2)),'green');
 plot(endpoints(:,1),endpoints(:,2),'b.')
-title('Monte Carlo Simulation With Error Ellipses')
-xlabel('Distance Down Range (m)')
-ylabel('Drift Distance');
-legend('1 Standard of Deviation','2 Standards of Deviation','3 Standards of Deviation','Landing Point');
+title('Monte Carlo Simulation')
+xlabel('Distance Down Range (ft)')
+ylabel('Drift Distance (ft)');
+legend('1 Standard Deviation','2 Standard Deviations','3 Standard Deviations','Landing Point');
 hold off
-
-fprintf('\nLoops Completed\n');
 
 TOC = toc;
 % Print results
-fprintf('\nArea of 1 std Ellipse: %4.2f m^2',polyarea(x,y))
-fprintf('\nArea of 2 std Ellipse: %4.2f m^2',polyarea(2*x,2*y))
-fprintf('\nArea of 3 std Ellipse: %4.2f m^2',polyarea(3*x, 3*y))
+fprintf('\nArea of 1 std Ellipse: %4.2f ft^2',polyarea(x,y))
+fprintf('\nArea of 2 std Ellipse: %4.2f ft^2',polyarea(2*x,2*y))
+fprintf('\nArea of 3 std Ellipse: %4.2f ft^2',polyarea(3*x, 3*y))
 fprintf('\nTotal Time to Run: %4.1f seconds \n',TOC);
 fprintf('Average Time per Loop: %4.1f seconds \n',TOC/LoopNumber);
